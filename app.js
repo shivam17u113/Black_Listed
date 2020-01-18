@@ -14,16 +14,17 @@ mongoClient.connect(url, (err, db) => {
 
         const myDb = db.db('shivam')
         const collection = myDb.collection('Register')
+        const collection_complain = myDb.collection('complain')
 
         app.post('/signup', (req, res) => {
 
             const newUser = {
                 name: req.body.name,
-                email: req.body.email,
-                password: req.body.password
+                contactNumber : req.body.contactNumber
+               
             }
 
-            const query = { email: newUser.email }
+            const query = { contactNumber: newUser.contactNumber }
 
             collection.findOne(query, (err, result) => {
 
@@ -39,11 +40,41 @@ mongoClient.connect(url, (err, db) => {
 
         })
 
+        app.post('/registerComplain', (req, res,next) => {
+
+            const newComplain = {
+                address: req.body.address,
+                longitude: req.body.longitude,
+                latitude: req.body.latitude,
+                road: req.body.road_name,
+                description: req.body.description,
+                image: req.body.image
+            }
+
+            console.log(newComplain)
+            const query = { longitude: newComplain.longitude ,latitude : newComplain.latitude }
+
+            collection_complain.findOne(query, (err, result) => {
+                    
+                if(err) throw err;
+                if (result == null) {
+                    collection.insertOne(newComplain, (err, result) => {
+                        console.log(result);
+
+                        res.send(JSON.stringify({"answer":"done"}));
+                    })
+                } else {
+                    res.status(404).send();
+                }
+
+            })
+
+        })
+
         app.post('/login', (req, res) => {
 
             const query = {
-                email: req.body.email, 
-                password: req.body.password
+                contactNumber : req.body.contactNumber
             }
 
             collection.findOne(query, (err, result) => {
